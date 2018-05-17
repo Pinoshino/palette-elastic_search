@@ -30,14 +30,18 @@ module Palette
           current_indices.first
         end
 
-        def create_index!
-          new_index_name = get_new_index_name
+        def indexing_process
           self.__elasticsearch__.client.indices.create index: new_index_name,
                                                        body: {
                                                          settings: self.settings.to_hash,
                                                          mappings: self.mappings.to_hash
                                                        }
           self.__elasticsearch__.import(index: new_index_name)
+        end
+
+        def create_index!
+          new_index_name = get_new_index_name
+          indexing_process
           self.__elasticsearch__.client.indices.update_aliases body: {
             actions: [
               { add: { index: new_index_name, alias: self.index_name } }
@@ -48,12 +52,7 @@ module Palette
         def reindex!
           new_index_name = get_new_index_name
           old_index_name = get_old_index_name
-          self.__elasticsearch__.client.indices.create index: new_index_name,
-                                                       body: {
-                                                         settings: self.settings.to_hash,
-                                                         mappings: self.mappings.to_hash
-                                                       }
-          self.__elasticsearch__.import(index: new_index_name)
+          indexing_process
           self.__elasticsearch__.client.indices.update_aliases body: {
             actions: [
               { remove: { index: old_index_name, alias: self.index_name } },
