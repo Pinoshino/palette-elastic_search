@@ -47,7 +47,7 @@ module Palette
               previous_end_at = process_end_at
               process_started_at = Time.current
               # @see https://github.com/elastic/elasticsearch-rails/blob/master/elasticsearch-model/lib/elasticsearch/model/importing.rb
-              self.__elasticsearch__.import(index: index_name, query: { where(updated_at: previous_started_at..previous_end_at) })
+              self.__elasticsearch__.import(index: index_name, query: -> { where(updated_at: previous_started_at..previous_end_at) })
               process_end_at = Time.current
               break if self.where(updated_at: process_started_at..process_end_at).empty?
             end
